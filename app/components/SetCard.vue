@@ -108,42 +108,43 @@ function avatarColor(name: string): string {
   z-index: 3;
 }
 
-.fan-item.i0 {
+/* Side cards overlap inward via transforms (symmetric → the fan stays centered).
+   :not(:only-child) leaves a lone cover (e.g. back-cover sets) upright & centered. */
+.fan-item.i0:not(:only-child) {
   width: 74px;
   height: 116px;
-  transform: rotate(-8deg);
-  transform-origin: bottom right;
-  margin-right: -22px;
+  transform: rotate(-8deg) translateX(24px);
+  transform-origin: bottom center;
 }
 
-.fan-item.i2 {
+.fan-item.i2:not(:only-child) {
   width: 74px;
   height: 116px;
-  transform: rotate(8deg);
-  transform-origin: bottom left;
-  margin-left: -22px;
+  transform: rotate(8deg) translateX(-24px);
+  transform-origin: bottom center;
+}
+
+.set-card.coins .fan {
+  align-items: center;
 }
 
 .set-card.coins .fan-item {
   width: 96px;
   height: 96px;
-  margin-bottom: -14px;
+  margin-bottom: 0;
   border-radius: 999px;
-  transform: none;
 }
 
-.set-card.coins .fan-item.i0 {
+.set-card.coins .fan-item.i0:not(:only-child) {
   width: 82px;
   height: 82px;
-  margin-right: -30px;
-  transform: none;
+  transform: translateX(30px);
 }
 
-.set-card.coins .fan-item.i2 {
+.set-card.coins .fan-item.i2:not(:only-child) {
   width: 82px;
   height: 82px;
-  margin-left: -30px;
-  transform: none;
+  transform: translateX(-30px);
 }
 
 .set-card.coins .fan-item img {

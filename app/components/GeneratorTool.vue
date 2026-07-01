@@ -141,15 +141,6 @@ const sm = computed(() =>
 const widthLabel = computed(() => `${widthMm.value} mm`)
 const sheetWord = computed(() => (sm.value.sheets === 1 ? 'sheet' : 'sheets'))
 
-// ===== to-scale reference =====
-const refCols = computed(() => Math.min(sm.value.perRow, 6))
-const refCells = computed(() => refCols.value * 3)
-const refSheetStyle = computed(() => ({ gridTemplateColumns: `repeat(${refCols.value}, 1fr)` }))
-const refCardStyle = computed(() => ({
-  width: `${widthMm.value * 1.4}px`,
-  height: `${(isCoins ? widthMm.value : widthMm.value * CARD_RATIO) * 1.4}px`,
-}))
-
 // ===== print =====
 const printRows = computed(() => {
   const cells: { src: string }[] = []
@@ -186,6 +177,7 @@ function printSheet() {
       <div class="gen-body">
         <!-- sidebar -->
         <aside class="gen-side">
+          <div class="gen-side-inner">
           <div class="side-group">
             <div class="side-label">Print size</div>
             <div class="side-sub">Paper</div>
@@ -201,24 +193,6 @@ function printSheet() {
               <button class="step-btn" aria-label="decrease" @click="stepWidth(-1)">−</button>
               <input class="width-range" type="range" :min="wMin" :max="wMax" step="1" v-model.number="widthMm">
               <button class="step-btn" aria-label="increase" @click="stepWidth(1)">+</button>
-            </div>
-          </div>
-
-          <div class="side-group">
-            <div class="side-label" style="margin-bottom: 11px">To-scale reference</div>
-            <div class="size-ref">
-              <div class="ref-sheet" :style="refSheetStyle">
-                <span v-for="n in refCells" :key="n" />
-              </div>
-              <div>
-                <div class="ref-card" :style="refCardStyle" />
-                <div style="font: 600 11px var(--font-mono); margin-top: 7px; color: var(--ink-2)">
-                  1 {{ isCoins ? 'coin' : 'card' }} = {{ widthLabel }}
-                </div>
-                <div style="font-size: 11px; color: var(--muted-2); margin-top: 1px">
-                  {{ sm.perRow }} per row · {{ sm.perSheet }}/sheet
-                </div>
-              </div>
             </div>
           </div>
 
@@ -243,6 +217,7 @@ function printSheet() {
               <span class="cat-name" @click="scrollToCat(row.top)">{{ row.node.label }}</span>
               <span class="cat-count">{{ row.node.coverIds.length }}</span>
             </div>
+          </div>
           </div>
         </aside>
 

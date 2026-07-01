@@ -62,21 +62,24 @@
 
 .gen-body {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
 }
 
-/* sidebar */
+/* sidebar: the column stretches full height (border/background run all the way
+   down); an inner sticky wrapper keeps the controls pinned while the preview scrolls. */
 .gen-side {
   width: 312px;
   flex: none;
   background: var(--panel);
   border-right: 1px solid var(--line);
-  padding: 20px;
+}
+
+.gen-side-inner {
   position: sticky;
   top: 0;
-  align-self: flex-start;
   max-height: 100vh;
   overflow: auto;
+  padding: 20px;
 }
 
 .side-label {
@@ -130,39 +133,6 @@
 .width-val {
   font: 600 12px var(--font-mono);
   color: var(--accent-dark);
-}
-
-/* to-scale reference */
-.size-ref {
-  background: var(--panel-3);
-  border: 1px solid var(--line);
-  border-radius: 13px;
-  padding: 14px;
-  display: flex;
-  align-items: flex-end;
-  gap: 16px;
-}
-
-.ref-sheet {
-  width: 82px;
-  height: 116px;
-  background: #fff;
-  border: 1px solid var(--line-2);
-  border-radius: 4px;
-  box-shadow: var(--sh-sm);
-  padding: 7px;
-  display: grid;
-  gap: 3px;
-}
-
-.ref-sheet span {
-  background: var(--accent-tint);
-  border-radius: 1.5px;
-}
-
-.ref-card {
-  background: var(--accent);
-  border-radius: 4px;
 }
 
 /* category tree */
@@ -426,10 +396,13 @@
   }
   .gen-side {
     width: 100%;
-    position: static;
-    max-height: none;
     border-right: none;
     border-bottom: 1px solid var(--line);
+  }
+  .gen-side-inner {
+    position: static;
+    max-height: none;
+    overflow: visible;
   }
 }
 
