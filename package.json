@@ -2,6 +2,7 @@
   "name": "skylanders-image-generator",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.9.0",
   "scripts": {
     "build:manifest": "node scripts/build-manifest.mjs",
     "predev": "node scripts/build-manifest.mjs",
