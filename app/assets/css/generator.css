@@ -1,3 +1,4 @@
+/* Ported from css/styles_generate.css — drives the generator preview + print layout. */
 @media print {
   @page { margin: 10mm 5mm; }
   html, body { margin: 0; padding: 0; }
@@ -11,8 +12,6 @@
   #preview-area, #info, #instructions { display: none !important; }
   #print-area { display: block !important; }
 }
-
-body { font-family: sans-serif; }
 
 #start_form, #start_form form {
   display: flex;
@@ -83,5 +82,10 @@ select:focus, input:focus {
   break-inside: avoid;
 }
 
+#preview-area .card, #preview-area .coin { cursor: pointer; }
+
 #info, #instructions { margin: 10px 0; }
 .highlight { color: red; font-weight: bold; }
+
+/* Generator pages sit on a plain white sheet (the old *_generator.html had no game background). */
+.generator-page { background: #fff; min-height: 100vh; }
