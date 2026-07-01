@@ -5,8 +5,8 @@ the decisions (and their reasons) behind the new structure. It's written for a
 future maintainer — human or AI — who needs to understand *why* things are the way
 they are before changing them.
 
-**Status:** Step 1 (faithful port) complete, 2026-07-01. Step 2 (UX redesign) pending —
-see [Deferred](#deferred-step-2).
+**Status:** Step 1 (faithful port) complete 2026-07-01. Step 2 (the "CoverForge" UX
+redesign) complete 2026-07-02 — see [§7](#7-step-2--the-coverforge-redesign).
 
 ---
 
@@ -219,16 +219,41 @@ app/data/games.ts  ───────┘        (labels + theming)
 
 ---
 
-## 6. Deferred (Step 2)
+## 6. Step 1 result
 
-Not done yet, intentionally:
+The faithful port shipped: one data-driven generator route, the folder-scan manifest,
+mm-accurate print, upstream-merge-friendly assets. The clunky UX (per-game full-page
+backgrounds, text-link menus, the "Generate" gate, click-to-remove-only) was left
+intact for Step 2.
 
-- Replace the **"Generate" gate** with a live-updating preview.
-- Better selection UX (filter by category, select-all/reset, keep-removed state across
-  reloads).
-- Possible visual redesign of the landing/generator pages.
-- Optional: the manifest is imported whole into the generator route's client chunk
-  (~4.7k path strings). Fine now; could be scoped per-set if bundle size matters.
+## 7. Step 2 — the "CoverForge" redesign
 
-When starting Step 2, keep the constraints in §3.1–3.2 intact (don't move `assets/`,
-don't reintroduce a dependency on `list.txt`).
+Implemented from a Claude Design mockup (`docs/DESIGN_BRIEF.md` was the input brief).
+The §3.1–3.2 constraints are unchanged — assets stay in place, data still comes from
+the folder-scan manifest, print is still mm-accurate.
+
+- **Design system "CoverForge"**: warm neutral shell + per-game accent; fonts Fredoka
+  / DM Sans / DM Mono self-hosted via `@nuxt/fonts` (tokens in `app/assets/css/main.css`).
+  Gotcha: `@nuxt/fonts` only self-hosts families named in real `font-family:`
+  declarations — so the base rules use literal names, not just CSS vars.
+- **New IA** (replaces the landing-per-game + 90-links model): `/` **home** game
+  selector → `/[game]` **set gallery** (Cards/Coins + Front/Back tabs + search) →
+  `/[game]/[type]/[set]` **generator**. `/` is now the home page (the old `/`→`/spyro`
+  redirect was removed).
+- **Generator rework** (`GeneratorTool.vue`): no Generate gate — live throughout.
+  Sidebar (paper, width slider, collapsible **category tree** from
+  `useCoverSet.ts`) + multi-select preview grid (opens empty; select per-category or
+  globally) + sticky count / sheet-estimate / Print bar. Sheet maths in
+  `app/utils/print.ts`. Single-image `Back_Covers*` sets collapse to one `×N` tile.
+- **New pieces**: `app/components/{AppHeader,GameCard,SetCard}.vue`,
+  `app/error.vue` (themed 404), brand mark + favicon set in `public/`, per-game logos
+  in `public/games/`, and `.github/workflows/deploy.yml` (GitHub Pages via Actions).
+- **Accessibility**: cover tiles and category checkboxes are keyboard-operable
+  (`role`/`aria-checked`/`tabindex` + Enter/Space); toggles use real `<button>`s with
+  `aria-pressed`.
+
+### Still open (nice-to-haves)
+
+- **SEO/social**: no meta description or Open Graph tags/image yet (owner will do).
+- The manifest is imported whole into the generator route's client chunk (~4.7k path
+  strings). Fine now; could be scoped per-set if bundle size matters.

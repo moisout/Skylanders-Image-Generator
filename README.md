@@ -1,10 +1,11 @@
-# [Skylanders Image Generator](https://skylandersnfc.github.io/Skylanders-Image-Generator/)
+# CoverForge
 
-A Skylanders Image Generator that lets you create printable cover images for your NFC cards and coins.
+Printable cover-art sheets for Skylanders NFC cards & coins. A community fork of the
+[SkylandersNFC Image Generator](https://github.com/skylandersnfc/Skylanders-Image-Generator),
+rebuilt as a statically-generated [Nuxt](https://nuxt.com) app.
 
-Built as a statically-generated [Nuxt](https://nuxt.com) app.
-
-# [<img src="images/preview.webp">](https://skylandersnfc.github.io/Skylanders-Image-Generator/)
+Pick a game → choose a creator's cover set → curate the covers you want → print a
+size-accurate sheet.
 
 ## Develop
 
@@ -33,11 +34,40 @@ pnpm preview      # preview the generated site locally
   `app/data/manifest.json` (`{ game: { cards|coins: { set: [image paths] } } }`).
   It runs automatically before `dev`/`build`/`generate`. Single-image
   `Back_Covers*` sets are tiled to fill a print sheet (card backs ×9, coin backs ×70).
-- **`app/data/games.ts`** is the only hand-authored data: per-game titles, colours,
-  backgrounds, and the human labels + Front/Back grouping for each cover set.
-- **Pages**: `app/pages/[game]/index.vue` (landing), a single
-  `app/pages/[game]/[type]/[set].vue` that replaces the old 90 generator HTML
-  files, and `app/pages/creators.vue`. `/` redirects to `/spyro`.
+- **`app/data/games.ts`** is the only hand-authored data: per-game titles, colours
+  (`color` + darker `accentDark`), release year, logo, background, and the human
+  labels + Front/Back grouping for each cover set.
+- **`app/composables/useCoverSet.ts`** turns a set's flat image list into a nested
+  **category tree** + clean cover names (derived from the folder paths). Sheet maths
+  (per-row / per-sheet) lives in **`app/utils/print.ts`**.
+
+### Screens (information architecture)
+
+- `app/pages/index.vue` — **home**, a game selector grid (`GameCard`).
+- `app/pages/[game]/index.vue` — **set gallery**: Cards/Coins + Front/Back tabs +
+  search, a grid of `SetCard`s (real cover thumbnails + creator credit).
+- `app/pages/[game]/[type]/[set].vue` → `GeneratorTool.vue` — the **generator**:
+  sidebar (paper A4/Letter, width slider, collapsible category tree) + a live
+  multi-select preview grid + a sticky count / sheet-estimate / **Print** bar.
+  Opens with nothing selected; print output is a bare mm-accurate grid (white page).
+- `app/pages/creators.vue` — credits + community-fork note.
+- `app/error.vue` — themed 404 / error page.
+
+### Look & feel
+
+- Design system "CoverForge": neutral warm shell + per-game accent, fonts **Fredoka**
+  / **DM Sans** / **DM Mono** self-hosted via `@nuxt/fonts`. Tokens/base in
+  `app/assets/css/main.css`; generator + print styles in `generator.css`.
+- Brand mark / favicons in `public/` (`favicon.svg`, `favicon.ico`,
+  `apple-touch-icon.png`, `icon-192/512.png`, `site.webmanifest`). Per-game logos in
+  `public/games/`.
+
+## Deploy (GitHub Pages)
+
+`.github/workflows/deploy.yml` builds on every push to `main` and publishes
+`.output/public` via GitHub Actions (`NITRO_PRESET=github-pages` so `_nuxt`/`_fonts`
+survive). In the repo: **Settings → Pages → Source: GitHub Actions**, then set the
+custom domain there. `app.baseURL` is `/` (root/custom-domain deployment).
 
 ## Merging upstream image changes
 

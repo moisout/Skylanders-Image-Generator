@@ -48,13 +48,13 @@ const imagesFor = (setName: string) => man[g.id]?.[type.value]?.[setName] ?? []
       <div class="filter-left">
         <span class="mono">Type</span>
         <div class="segmented">
-          <button :class="{ active: type === 'cards' }" @click="type = 'cards'">Cards</button>
-          <button :class="{ active: type === 'coins' }" @click="type = 'coins'">Coins</button>
+          <button :class="{ active: type === 'cards' }" :aria-pressed="type === 'cards'" @click="type = 'cards'">Cards</button>
+          <button :class="{ active: type === 'coins' }" :aria-pressed="type === 'coins'" @click="type = 'coins'">Coins</button>
         </div>
         <div class="divider" />
         <div class="segmented segmented--ink">
-          <button :class="{ active: group === 'front' }" @click="group = 'front'">Front</button>
-          <button :class="{ active: group === 'back' }" @click="group = 'back'">Back</button>
+          <button :class="{ active: group === 'front' }" :aria-pressed="group === 'front'" @click="group = 'front'">Front</button>
+          <button :class="{ active: group === 'back' }" :aria-pressed="group === 'back'" @click="group = 'back'">Back</button>
         </div>
       </div>
       <div class="search">
@@ -202,6 +202,19 @@ const imagesFor = (setName: string) => man[g.id]?.[type.value]?.[setName] ?? []
 @media (max-width: 720px) {
   .set-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .band h1 {
+    font-size: 22px;
+  }
+  .band-count {
+    padding: 5px 11px;
+    font-size: 12px;
+  }
+  .filter-left {
+    gap: 8px;
   }
 }
 </style>

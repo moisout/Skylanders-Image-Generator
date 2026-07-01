@@ -182,8 +182,8 @@ function printSheet() {
             <div class="side-label">Print size</div>
             <div class="side-sub">Paper</div>
             <div class="segmented" style="width: 100%">
-              <button style="flex: 1" :class="{ active: paper === 'A4' }" @click="paper = 'A4'">A4</button>
-              <button style="flex: 1" :class="{ active: paper === 'Letter' }" @click="paper = 'Letter'">Letter</button>
+              <button style="flex: 1" :class="{ active: paper === 'A4' }" :aria-pressed="paper === 'A4'" @click="paper = 'A4'">A4</button>
+              <button style="flex: 1" :class="{ active: paper === 'Letter' }" :aria-pressed="paper === 'Letter'" @click="paper = 'Letter'">Letter</button>
             </div>
             <div class="side-sub" style="display: flex; justify-content: space-between; align-items: center">
               <span>{{ isCoins ? 'Coin width' : 'Card width' }}</span>
@@ -191,7 +191,16 @@ function printSheet() {
             </div>
             <div class="width-row">
               <button class="step-btn" aria-label="decrease" @click="stepWidth(-1)">−</button>
-              <input class="width-range" type="range" :min="wMin" :max="wMax" step="1" v-model.number="widthMm">
+              <input
+                class="width-range"
+                type="range"
+                :min="wMin"
+                :max="wMax"
+                step="1"
+                v-model.number="widthMm"
+                :aria-label="`${isCoins ? 'Coin' : 'Card'} width in millimetres`"
+                :aria-valuetext="widthLabel"
+              >
               <button class="step-btn" aria-label="increase" @click="stepWidth(1)">+</button>
             </div>
           </div>
@@ -207,14 +216,26 @@ function printSheet() {
               class="cat-row"
               :style="{ paddingLeft: `${row.depth * 16}px` }"
             >
-              <span v-if="row.hasChildren" class="cat-caret" @click.stop="toggleExpand(row.key)">
+              <button
+                v-if="row.hasChildren"
+                class="cat-caret"
+                :aria-label="row.expanded ? `Collapse ${row.node.label}` : `Expand ${row.node.label}`"
+                @click.stop="toggleExpand(row.key)"
+              >
                 {{ row.expanded ? '▾' : '▸' }}
-              </span>
+              </button>
               <span v-else class="cat-caret" />
-              <div class="cat-box" :class="row.state" @click.stop="toggleCategory(row.node)">
+              <button
+                class="cat-box"
+                :class="row.state"
+                role="checkbox"
+                :aria-checked="row.state === 'on' ? 'true' : row.state === 'some' ? 'mixed' : 'false'"
+                :aria-label="`Select all covers in ${row.node.label}`"
+                @click.stop="toggleCategory(row.node)"
+              >
                 {{ row.state === 'on' ? '✓' : row.state === 'some' ? '–' : '' }}
-              </div>
-              <span class="cat-name" @click="scrollToCat(row.top)">{{ row.node.label }}</span>
+              </button>
+              <button class="cat-name" @click="scrollToCat(row.top)">{{ row.node.label }}</button>
               <span class="cat-count">{{ row.node.coverIds.length }}</span>
             </div>
           </div>
@@ -255,7 +276,13 @@ function printSheet() {
                 class="tile"
                 :class="{ sel: isSelected(c.i) }"
                 :title="c.name"
+                role="checkbox"
+                :aria-checked="isSelected(c.i)"
+                :aria-label="c.name"
+                tabindex="0"
                 @click="toggleCover(c.i)"
+                @keydown.enter.prevent="toggleCover(c.i)"
+                @keydown.space.prevent="toggleCover(c.i)"
               >
                 <div class="tile-thumb">
                   <img :src="c.src" :alt="c.name" loading="lazy">

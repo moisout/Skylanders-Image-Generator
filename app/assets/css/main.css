@@ -102,6 +102,8 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 16px;
   padding: 15px 28px;
   background: var(--panel);
   border-bottom: 1px solid var(--line);
@@ -156,6 +158,19 @@ h3 {
 @media (max-width: 640px) {
   .cf-nav .cf-hide-sm {
     display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .cf-header {
+    padding: 12px 16px;
+  }
+  .cf-nav {
+    gap: 16px;
+    font-size: 13px;
+  }
+  .cf-wordmark {
+    font-size: 17px;
   }
 }
 
