@@ -15,16 +15,21 @@ if (!game || (type !== 'cards' && type !== 'coins') || !images) {
   throw createError({ statusCode: 404, statusMessage: 'Generator not found', fatal: true })
 }
 
-useHead({
-  title: `${type === 'coins' ? 'Coins' : 'Cards'} Generator`,
-})
+const g = game!
+const label =
+  [...g[type as 'cards' | 'coins'].front, ...g[type as 'cards' | 'coins'].back].find(
+    (s) => s.set === set,
+  )?.label ?? set
+
+useHead({ title: `${label} — CoverForge` })
 </script>
 
 <template>
   <GeneratorTool
-    :game="game!"
+    :game="g"
     :type="(type as 'cards' | 'coins')"
     :set="set"
+    :label="label"
     :images="images!"
   />
 </template>

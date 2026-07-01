@@ -21,8 +21,14 @@ export interface Game {
   title: string
   /** Background image served from /images */
   bg: string
+  /** Full-title game logo (public/games/*.png), shown on the home panels */
+  logo: string
   /** Accent colour (matches the old per-game button colour) */
   color: string
+  /** Darker accent shade for text on light tints (AA contrast) */
+  accentDark: string
+  /** Release year, shown on the home game panels */
+  year: number
   cards: { front: SetLink[]; back: SetLink[] }
   coins: { front: SetLink[]; back: SetLink[] }
 }
@@ -33,7 +39,10 @@ export const games: Game[] = [
     dir: '01_Spyro',
     title: "Spyro's Adventure",
     bg: '/images/spyro.webp',
+    logo: '/games/spyros-adventure.png',
     color: '#0aa808',
+    accentDark: '#0b7d09',
+    year: 2011,
     cards: {
       front: [
         { set: 'Mr_Shadow', label: "Mr Shadow's Covers (Favorite)" },
@@ -67,7 +76,10 @@ export const games: Game[] = [
     dir: '02_Giants',
     title: 'Giants',
     bg: '/images/giants.webp',
+    logo: '/games/giants.png',
     color: '#FB7600',
+    accentDark: '#c85d00',
+    year: 2012,
     cards: {
       front: [
         { set: 'Mr_Shadow', label: "Mr Shadow's Covers (Favorite)" },
@@ -101,7 +113,10 @@ export const games: Game[] = [
     dir: '03_Swap_Force',
     title: 'Swap Force',
     bg: '/images/swapforce.webp',
+    logo: '/games/swap-force.png',
     color: '#1888c8',
+    accentDark: '#106a9c',
+    year: 2013,
     cards: {
       front: [
         { set: 'Mr_Shadow', label: "Mr Shadow's Covers (Favorite)" },
@@ -129,7 +144,10 @@ export const games: Game[] = [
     dir: '04_Trap_Team',
     title: 'Trap Team',
     bg: '/images/trapteam.webp',
-    color: '#FE0000',
+    logo: '/games/trap-team.png',
+    color: '#DC2626',
+    accentDark: '#B91C1C',
+    year: 2014,
     cards: {
       front: [
         { set: 'Mr_Shadow', label: "Mr Shadow's Covers (Favorite)" },
@@ -162,7 +180,10 @@ export const games: Game[] = [
     dir: '05_SuperChargers',
     title: 'SuperChargers',
     bg: '/images/superchargers.webp',
+    logo: '/games/superchargers.png',
     color: '#99722D',
+    accentDark: '#6f5320',
+    year: 2015,
     cards: {
       front: [
         { set: 'Mr_Shadow', label: "Mr Shadow's Covers (Favorite)" },
@@ -194,7 +215,10 @@ export const games: Game[] = [
     dir: '06_Imaginators',
     title: 'Imaginators',
     bg: '/images/imaginators.webp',
+    logo: '/games/imaginators.png',
     color: '#570E77',
+    accentDark: '#440a5e',
+    year: 2016,
     cards: {
       front: [
         { set: 'Mr_Shadow', label: "Mr Shadow's Covers (Favorite)" },
@@ -237,3 +261,18 @@ export const games: Game[] = [
 export const gamesById: Record<string, Game> = Object.fromEntries(
   games.map((g) => [g.id, g]),
 )
+
+/** Every set of a game, flattened across cards/coins and front/back. */
+export function allSets(g: Game): SetLink[] {
+  return [
+    ...g.cards.front,
+    ...g.cards.back,
+    ...g.coins.front,
+    ...g.coins.back,
+  ]
+}
+
+/** Total number of creator sets in a game (shown on home + gallery header). */
+export function setCount(g: Game): number {
+  return allSets(g).length
+}

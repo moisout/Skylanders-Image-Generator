@@ -1,91 +1,493 @@
-/* Ported from css/styles_generate.css — drives the generator preview + print layout. */
-@media print {
-  @page { margin: 10mm 5mm; }
-  html, body { margin: 0; padding: 0; }
-  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-  .card, .coin {
-    width: var(--w-mm) !important;
-    height: var(--h-mm) !important;
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-  #preview-area, #info, #instructions { display: none !important; }
-  #print-area { display: block !important; }
+/* ===== Generator screen ===== */
+
+.gen {
+  min-height: 100vh;
+  background: var(--panel-2);
+  padding-bottom: 84px; /* room for the fixed selection bar */
 }
 
-#start_form, #start_form form {
+.gen-topbar {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
+  justify-content: space-between;
   gap: 12px;
+  padding: 13px 26px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
 }
-#start_form form { gap: 10px; }
 
-.btn-blue, select, input[type=text] {
-  border-radius: 6px;
-  font-size: 14px;
+.gen-crumb {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
-.btn-blue {
-  background: #007BFF;
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.btn-blue:hover { background: #0056b3; }
 
-select, #cardSize, #coinSize {
+.gen-crumb .sep {
+  color: #c9c2b5;
+}
+
+.gen-game {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-tint);
+  color: var(--accent-dark);
+  border-radius: 999px;
+  padding: 4px 11px;
+  font: 600 12.5px var(--font-body);
+  white-space: nowrap;
+}
+
+.gen-game .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.gen-setname {
+  font-size: 13.5px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gen-meta {
+  font: 500 12.5px var(--font-body);
+  color: var(--muted);
+}
+
+.gen-body {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* sidebar */
+.gen-side {
+  width: 312px;
+  flex: none;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  padding: 20px;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  max-height: 100vh;
+  overflow: auto;
+}
+
+.side-label {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+.side-group {
+  margin-bottom: 22px;
+}
+
+.side-sub {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin: 12px 0 7px;
+}
+
+/* width control */
+.width-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.width-range {
+  flex: 1;
+  accent-color: var(--accent);
+}
+
+.step-btn {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
   background: #fff;
-  border: 1px solid #007BFF;
-  padding: 6px 12px;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--ink-2);
   cursor: pointer;
-  text-align: center;
-  width: 80px;
-}
-select:focus, input:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(0,123,255,.35);
 }
 
-.previews {
-  margin-top: 10px;
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-.preview img {
-  max-width: 300px;
-  border: 1px solid #ccc;
-  margin-top: 5px;
+.step-btn:hover {
+  background: var(--panel-3);
 }
 
-#preview-area, #print-area {
-  margin: 0 auto;
+.width-val {
+  font: 600 12px var(--font-mono);
+  color: var(--accent-dark);
+}
+
+/* to-scale reference */
+.size-ref {
+  background: var(--panel-3);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 14px;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.ref-sheet {
+  width: 82px;
+  height: 116px;
+  background: #fff;
+  border: 1px solid var(--line-2);
+  border-radius: 4px;
+  box-shadow: var(--sh-sm);
+  padding: 7px;
+  display: grid;
   gap: 3px;
 }
 
-#print-area { display: none; width: var(--safe-width); }
-
-.print-row {
-  display: flex;
-  justify-content: center;
-  flex-wrap: nowrap;
-  gap: 0.3mm;
-  margin-bottom: 0.3mm;
-  page-break-inside: avoid;
-  break-inside: avoid;
+.ref-sheet span {
+  background: var(--accent-tint);
+  border-radius: 1.5px;
 }
 
-#preview-area .card, #preview-area .coin { cursor: pointer; }
+.ref-card {
+  background: var(--accent);
+  border-radius: 4px;
+}
 
-#info, #instructions { margin: 10px 0; }
-.highlight { color: red; font-weight: bold; }
+/* category tree */
+.cat-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 0;
+  cursor: pointer;
+}
 
-/* Generator pages sit on a plain white sheet (the old *_generator.html had no game background). */
-.generator-page { background: #fff; min-height: 100vh; }
+.cat-caret {
+  width: 12px;
+  color: var(--faint);
+  font-size: 11px;
+  flex: none;
+  text-align: center;
+}
+
+.cat-box {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border-radius: 5px;
+  border: 2px solid var(--line-2);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.cat-box.on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.cat-box.some {
+  background: var(--accent-tint);
+  border-color: var(--accent);
+  color: var(--accent-dark);
+}
+
+.cat-name {
+  flex: 1;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cat-count {
+  font: 500 11.5px var(--font-mono);
+  color: var(--faint);
+}
+
+/* main / preview */
+.gen-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.gen-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 24px;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  background: var(--panel-2);
+  z-index: 2;
+  flex-wrap: wrap;
+}
+
+.gen-toolbar .title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.cat-section {
+  padding: 4px 24px 8px;
+}
+
+.cat-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 0 12px;
+}
+
+.cat-section-head h3 {
+  font-size: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
+  gap: 14px;
+}
+
+.gen.is-coins .grid {
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+}
+
+/* cover tile */
+.tile {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.14s;
+}
+
+.tile:hover {
+  transform: translateY(-3px);
+}
+
+.tile-thumb {
+  position: relative;
+  aspect-ratio: 2.125 / 3.375;
+  border-radius: var(--r-tile);
+  overflow: hidden;
+  background: #eef0ea;
+  border: 1px solid var(--line);
+  transition: box-shadow 0.14s;
+}
+
+.tile:hover .tile-thumb {
+  box-shadow: var(--sh-card);
+}
+
+.gen.is-coins .tile-thumb {
+  aspect-ratio: 1 / 1;
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+}
+
+.tile-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gen.is-coins .tile-thumb img {
+  object-fit: contain;
+}
+
+/* name caption below the thumbnail — sits on the clean paper, not the art */
+.tile-cap {
+  margin-top: 7px;
+  font: 600 12px/1.25 var(--font-body);
+  color: var(--ink-2);
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tile.sel .tile-cap {
+  color: var(--accent-dark);
+}
+
+.tile-copies {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font: 600 10.5px var(--font-mono);
+}
+
+.tile.sel .tile-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 3px solid var(--accent);
+  border-radius: var(--r-tile);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+}
+
+.gen.is-coins .tile.sel .tile-thumb::after {
+  border-radius: 999px;
+}
+
+.tile-check {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+}
+
+/* sticky selection bar */
+.gen-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 26px;
+  background: var(--panel);
+  border-top: 1px solid var(--line-2);
+  box-shadow: 0 -4px 16px rgba(30, 25, 15, 0.06);
+  flex-wrap: wrap;
+}
+
+.gen-bar .count {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 24px;
+  color: var(--accent-dark);
+}
+
+.gen-bar .sep {
+  height: 24px;
+  width: 1px;
+  background: var(--line-2);
+}
+
+.gen-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.gen-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* responsive: sidebar collapses under the topbar on narrow screens */
+@media (max-width: 900px) {
+  .gen-body {
+    flex-direction: column;
+  }
+  .gen-side {
+    width: 100%;
+    position: static;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+}
+
+/* ===== Print output — only the mm-accurate grid of selected covers ===== */
+.print-only {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 10mm 5mm;
+  }
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background: #fff !important;
+    background-image: none !important;
+  }
+  * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  /* the on-screen wrapper carries an off-white panel colour — force white for print */
+  .gen {
+    background: #fff !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+  }
+  .screen-only {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .print-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .print-row {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 0.3mm;
+    margin-bottom: 0.3mm;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .print-cell {
+    width: var(--w-mm);
+    height: var(--h-mm);
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .print-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}

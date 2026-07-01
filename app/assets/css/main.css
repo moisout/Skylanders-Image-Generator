@@ -1,194 +1,284 @@
+/* ===== CoverForge design system — tokens, base shell, shared primitives ===== */
+
+:root {
+  /* neutrals */
+  --bg: #e7e2da;
+  --panel: #fff;
+  --panel-2: #fbfaf7;
+  --panel-3: #f7f4ee;
+  --ink: #1c1a15;
+  --ink-2: #3a372f;
+  --muted: #6b6559;
+  --muted-2: #8a8478;
+  --faint: #a8a196;
+  --line: rgba(20, 18, 12, 0.08);
+  --line-2: rgba(20, 18, 12, 0.14);
+  --chip: #efe9df;
+  --chip-2: #f2ede4;
+
+  /* radius */
+  --r-tile: 10px;
+  --r-btn: 10px;
+  --r-card: 16px;
+  --r-panel: 20px;
+
+  /* elevation */
+  --sh-sm: 0 1px 3px rgba(30, 25, 15, 0.05);
+  --sh-card: 0 12px 26px rgba(30, 25, 15, 0.13);
+  --sh-panel: 0 2px 4px rgba(30, 25, 15, 0.05), 0 26px 60px rgba(30, 25, 15, 0.11);
+
+  /* type */
+  --font-display: 'Fredoka', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
+
+  /* accent — overridden per-game via inline --accent / --accent-dark */
+  --accent: #0aa808;
+  --accent-dark: #0b7d09;
+  --accent-tint: color-mix(in srgb, var(--accent) 12%, #fff);
+}
+
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
-html {
-    background: no-repeat center center fixed;
-    background-size: cover;
-}
-
-html[data-page="spyro"] {
-    background: url('/images/spyro.webp') no-repeat center center fixed;
-    background-size: cover;
-}
-
-html[data-page="giants"] {
-    background: url('/images/giants.webp') no-repeat center center fixed;
-    background-size: cover;
-}
-
-html[data-page="swapforce"] {
-    background: url('/images/swapforce.webp') no-repeat center center fixed;
-    background-size: cover;
-}
-
-html[data-page="trapteam"] {
-    background: url('/images/trapteam.webp') no-repeat center center fixed;
-    background-size: cover;
-}
-
-html[data-page="superchargers"] {
-    background: url('/images/superchargers.webp') no-repeat center center fixed;
-    background-size: cover;
-}
-
-html[data-page="imaginators"] {
-    background: url('/images/imaginators.webp') no-repeat center center fixed;
-    background-size: cover;
-}
-
-html[data-page="creators"] {
-    background: url('/images/creators.webp') no-repeat center center fixed;
-    background-size: cover;
+html,
+body {
+  margin: 0;
+  padding: 0;
 }
 
 body {
-    font: 14px/1.5 Arial, Helvetica, sans-serif;
-    margin: 0;
-}
-
-header {
-    text-align: center;
-    width: 100%;
-    padding: 10px;
-    overflow: hidden;
-}
-
-h1, h2, h3 {
-	text-align:center;
-    color: #fff;
-	text-shadow: 2px 2px 2px black;
-}
-
-ul {
-    list-style: none;
-    padding: 5px;
-    margin: 0 0 30px;
-    text-align: center;
-}
-
-ul li {
-    display: inline-block;
-}
-
-ul a {
-    text-decoration: none;
-    color: #FFF;
-    background-color: #000;
-    padding: 10px 16px;
-    border-radius: 2px;
-    font-size: 16px;
-    margin: 4px;
-    display: inline-block;
-    line-height: 1;
-    opacity: 0.8;
-    transition: opacity 0.2s ease;
-}
-
-ul a.active {
-    background-color: #0aa808;
-    pointer-events: none;
-}
-
-ul a:hover {
-    opacity: 0.5;
+  background: var(--bg);
+  background-image: radial-gradient(rgba(20, 18, 12, 0.05) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-attachment: fixed;
+  /* Literal family names here so @nuxt/fonts detects & self-hosts them
+     (it scans real font-family declarations, not values hidden in CSS vars). */
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
+  color: inherit;
   text-decoration: none;
 }
 
-/* Per-game cover buttons. Colour is driven by --game-color set on the link. */
-.cover-link {
-    text-align: center;
-    display: block;
-    box-sizing: border-box;
-    background-color: var(--game-color, #0aa808);
-    box-shadow: 0 2px 1px 0 rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-    font: bold 20px sans-serif;
-    color: #ffffff;
-    width: 330px;
-    padding: 18px 0;
-    margin: 20px auto;
-    z-index: 1;
-    border-radius: 3px;
+img {
+  display: block;
+  max-width: 100%;
 }
 
-.cover-link:hover {
-    opacity: 0.7;
+h1,
+h2,
+h3 {
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 600;
+  margin: 0;
 }
 
-.footer {
-  background-color: rgba(0, 0, 0, 0.8);
+/* layout */
+.container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* mono labels / meta */
+.mono {
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+/* ===== header ===== */
+.cf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 28px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+.cf-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cf-logo {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  flex: none;
+}
+
+.cf-wordmark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 19px;
+  line-height: 1;
+}
+
+.cf-tagline {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.cf-nav {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  font: 500 14px var(--font-body);
+  color: var(--muted);
+}
+
+.cf-nav a:hover {
+  color: var(--ink);
+}
+
+.cf-nav a.router-link-active {
+  color: var(--ink);
+}
+
+.cf-nav .cf-fork {
+  font: 500 12px var(--font-mono);
+  color: var(--faint);
+}
+
+@media (max-width: 640px) {
+  .cf-nav .cf-hide-sm {
+    display: none;
+  }
+}
+
+/* ===== buttons / chips / segmented ===== */
+.btn {
+  border: 1px solid var(--line-2);
+  background: #fff;
+  border-radius: var(--r-btn);
+  padding: 8px 14px;
+  font: 600 13px var(--font-body);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.btn:hover {
+  background: var(--panel-3);
+}
+
+.btn-primary {
+  border: none;
+  background: var(--accent);
   color: #fff;
-  text-align: center;
-  padding: 20px 0;
-  font-family: 'Arial', sans-serif;
-  font-size: 14px;
+  border-radius: 12px;
+  padding: 12px 26px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent);
+  transition: filter 0.15s, box-shadow 0.15s, opacity 0.15s;
 }
 
-.footer-link {
-  color: #FFF;
+.btn-primary:hover {
+  filter: brightness(1.05);
 }
 
-.footer-link:hover {
-  color: #1888c8;
-  text-decoration: underline;
+.btn-primary:disabled {
+  opacity: 0.4;
+  box-shadow: none;
+  cursor: not-allowed;
 }
 
-/* ===== Creators page (ported from creators.css) ===== */
-.creators {
-    margin: 30px auto;
-    width: 600px;
+.segmented {
+  display: inline-flex;
+  background: var(--chip-2);
+  border-radius: 11px;
+  padding: 3px;
+  gap: 3px;
 }
 
-.creator-item {
-    display: flex;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.7);
-    box-shadow: 0 2px 1px rgba(0, 0, 0, 0.2);
-    padding: 20px;
-    margin: 20px 0;
-    border-radius: 20px;
-    color: #fff;
-    font: bold 18px Arial, sans-serif;
-    text-align: left;
-    transition: transform 0.3s, opacity 0.3s;
+.segmented button {
+  border: none;
+  background: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font: 600 13.5px var(--font-body);
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.15s, color 0.15s;
 }
 
-.creator-item:hover {
-    opacity: 0.7;
-    transform: translateY(-5px);
+.segmented button.active {
+  background: var(--accent);
+  color: #fff;
 }
 
-.creator-avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 20px;
-    border: 2px solid #fff;
-    flex-shrink: 0;
+.segmented.segmented--ink button.active {
+  background: var(--ink);
+  color: #fff;
 }
 
-.creator-text {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    flex-grow: 1;
+.chip {
+  border: 1px solid var(--line-2);
+  background: #fff;
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font: 600 12.5px var(--font-body);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
-.creator-name {
-    font-size: 22px;
-    margin-bottom: 8px;
-    font-weight: bold;
+.chip:hover {
+  border-color: var(--muted-2);
 }
 
-.creator-thanks {
-    font-size: 15px;
-    font-style: italic;
-    color: #ccc;
+.chip.active {
+  background: var(--accent-tint);
+  border-color: var(--accent);
+  color: var(--accent-dark);
+}
+
+/* search box */
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  padding: 8px 13px;
+  min-width: 220px;
+}
+
+.search input {
+  border: none;
+  outline: none;
+  background: none;
+  font: 400 13.5px var(--font-body);
+  color: var(--ink);
+  width: 100%;
+}
+
+.search input::placeholder {
+  color: var(--faint);
+}
+
+/* focus visibility */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }

@@ -1,144 +1,327 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { Game } from '~/data/games'
+import type { CatNode } from '~/composables/useCoverSet'
 
 const props = defineProps<{
   game: Game
   type: 'cards' | 'coins'
   set: string
+  label: string
   images: string[]
 }>()
 
-// === Constants (ported 1:1 from scripts/generator_cards.js / generator_coins.js) ===
 const isCoins = props.type === 'coins'
-const pxPerMm = isCoins ? 7 : 3.2
-const CARD_RATIO = 3.375 / 2.125
-const DEFAULT_WIDTH = isCoins ? 26 : 54
-const sizeLabel = isCoins ? 'NFC Coin Size:' : 'NFC Card Width:'
-const imgClass = isCoins ? 'coin' : 'card'
+const coverSet = useCoverSet(props.images, { dir: props.game.dir, type: props.type, set: props.set })
 
-// === Reactive state ===
-const paperType = ref<'A4' | 'Letter'>('A4')
-const sizeInput = ref(`${DEFAULT_WIDTH} mm`)
-const generated = ref(false)
-const activeWidthMm = ref(DEFAULT_WIDTH)
-const activeSafeMm = ref(190)
-const kept = ref<number[]>([])
+const accentStyle = {
+  '--accent': props.game.color,
+  '--accent-dark': props.game.accentDark,
+}
+const typeLabel = isCoins ? 'Coins' : 'Cards'
 
-// === Helpers (ported) ===
-function parseWidth(input: string): number {
-  const str = input.trim().toLowerCase()
-  if (str.endsWith('cm')) return parseFloat(str) * 10 || NaN
-  if (str.endsWith('mm')) return parseFloat(str) || NaN
-  return parseFloat(str) || NaN
+// ===== controls =====
+const wMin = isCoins ? 15 : 30
+const wMax = isCoins ? 45 : 90
+const paper = ref<'A4' | 'Letter'>('A4')
+const widthMm = ref(isCoins ? 26 : 54)
+
+function stepWidth(d: number) {
+  widthMm.value = Math.min(wMax, Math.max(wMin, widthMm.value + d))
 }
 
-function encodePath(rel: string): string {
-  return rel.split('/').map(encodeURIComponent).join('/')
+// ===== selection (empty by default — pick up) =====
+const selected = ref<Set<number>>(new Set())
+
+function mutate(fn: (s: Set<number>) => void) {
+  const s = new Set(selected.value)
+  fn(s)
+  selected.value = s
+}
+const isSelected = (i: number) => selected.value.has(i)
+function toggleCover(i: number) {
+  mutate((s) => (s.has(i) ? s.delete(i) : s.add(i)))
+}
+function selectIds(ids: number[]) {
+  mutate((s) => ids.forEach((id) => s.add(id)))
+}
+function clearIds(ids: number[]) {
+  mutate((s) => ids.forEach((id) => s.delete(id)))
+}
+function selectAllGlobal() {
+  selected.value = new Set(coverSet.covers.map((c) => c.i))
+}
+function clearGlobal() {
+  selected.value = new Set()
+}
+function toggleCategory(node: CatNode) {
+  const all = node.coverIds.every((id) => selected.value.has(id))
+  all ? clearIds(node.coverIds) : selectIds(node.coverIds)
+}
+function catState(node: CatNode): 'on' | 'some' | 'none' {
+  let n = 0
+  for (const id of node.coverIds) if (selected.value.has(id)) n++
+  return n === 0 ? 'none' : n === node.coverIds.length ? 'on' : 'some'
 }
 
-function srcFor(i: number): string {
-  return `/assets/${props.game.dir}/${props.type}/${props.set}/${encodePath(props.images[i]!)}`
+// ===== category tree (sidebar) =====
+const allKeys: string[] = []
+;(function collect(nodes: CatNode[], parent: string) {
+  for (const node of nodes) {
+    const key = parent ? `${parent}/${node.label}` : node.label
+    if (node.children.length) {
+      allKeys.push(key)
+      collect(node.children, key)
+    }
+  }
+})(coverSet.tree, '')
+const expanded = ref<Set<string>>(new Set(allKeys))
+function toggleExpand(key: string) {
+  mutateExpand(key)
+}
+function mutateExpand(key: string) {
+  const s = new Set(expanded.value)
+  s.has(key) ? s.delete(key) : s.add(key)
+  expanded.value = s
 }
 
-// === Derived layout ===
-const heightMm = computed(() => (isCoins ? activeWidthMm.value : activeWidthMm.value * CARD_RATIO))
-const perRow = computed(() => Math.max(1, Math.floor(activeSafeMm.value / activeWidthMm.value)))
-const previewW = computed(() => activeWidthMm.value * pxPerMm)
-const previewH = computed(() => heightMm.value * pxPerMm)
-
-const printRows = computed(() => {
-  const rows: number[][] = []
-  kept.value.forEach((idx, pos) => {
-    if (pos % perRow.value === 0) rows.push([])
-    rows[rows.length - 1]!.push(idx)
-  })
-  return rows
+interface Row {
+  key: string
+  node: CatNode
+  depth: number
+  hasChildren: boolean
+  expanded: boolean
+  top: string
+  state: 'on' | 'some' | 'none'
+}
+const catRows = computed(() => {
+  const out: Row[] = []
+  const walk = (nodes: CatNode[], depth: number, parent: string, top: string) => {
+    for (const node of nodes) {
+      const key = parent ? `${parent}/${node.label}` : node.label
+      const topLabel = depth === 0 ? node.label : top
+      const hasChildren = node.children.length > 0
+      const isExp = expanded.value.has(key)
+      out.push({ key, node, depth, hasChildren, expanded: isExp, top: topLabel, state: catState(node) })
+      if (hasChildren && isExp) walk(node.children, depth + 1, key, topLabel)
+    }
+  }
+  walk(coverSet.tree, 0, '', '')
+  return out
 })
 
-// === Actions ===
-function generate() {
-  const safe = paperType.value === 'Letter' ? 195 : 190
-  let w = parseWidth(sizeInput.value)
-  if (!w || w <= 0) {
-    alert('Invalid width. Resetting to default value.')
-    w = DEFAULT_WIDTH
-    sizeInput.value = `${DEFAULT_WIDTH} mm`
+// ===== preview sections (per top-level category) =====
+const sections = computed(() =>
+  coverSet.tree.map((node) => ({
+    label: node.label,
+    ids: node.coverIds,
+    covers: node.coverIds.map((id) => coverSet.covers[id]!),
+  })),
+)
+
+// section scroll targets
+const sectionEls: Record<string, HTMLElement | null> = {}
+function registerSection(label: string, el: unknown) {
+  sectionEls[label] = (el as HTMLElement) ?? null
+}
+function scrollToCat(top: string) {
+  sectionEls[top]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+// ===== derived counts / sheet math =====
+const selectedCount = computed(() => selected.value.size)
+const printCount = computed(() => {
+  let n = 0
+  for (const c of coverSet.covers) if (selected.value.has(c.i)) n += c.copies
+  return n
+})
+const sm = computed(() =>
+  sheetMath({ paper: paper.value, type: props.type, widthMm: widthMm.value, count: printCount.value }),
+)
+const widthLabel = computed(() => `${widthMm.value} mm`)
+const sheetWord = computed(() => (sm.value.sheets === 1 ? 'sheet' : 'sheets'))
+
+// ===== to-scale reference =====
+const refCols = computed(() => Math.min(sm.value.perRow, 6))
+const refCells = computed(() => refCols.value * 3)
+const refSheetStyle = computed(() => ({ gridTemplateColumns: `repeat(${refCols.value}, 1fr)` }))
+const refCardStyle = computed(() => ({
+  width: `${widthMm.value * 1.4}px`,
+  height: `${(isCoins ? widthMm.value : widthMm.value * CARD_RATIO) * 1.4}px`,
+}))
+
+// ===== print =====
+const printRows = computed(() => {
+  const cells: { src: string }[] = []
+  for (const c of coverSet.covers) {
+    if (selected.value.has(c.i)) for (let k = 0; k < c.copies; k++) cells.push(c)
   }
-  activeWidthMm.value = w
-  activeSafeMm.value = safe
-  kept.value = props.images.map((_, i) => i)
-  generated.value = true
-}
-
-function removeImage(i: number) {
-  kept.value = kept.value.filter((x) => x !== i)
-}
-
+  const per = sm.value.perRow
+  const rows: { src: string }[][] = []
+  for (let i = 0; i < cells.length; i += per) rows.push(cells.slice(i, i + per))
+  return rows
+})
 function printSheet() {
   window.print()
 }
 </script>
 
 <template>
-  <div class="generator-page">
-    <!-- Start form -->
-    <div v-if="!generated" id="start_form">
-      <form @submit.prevent>
-        <div>
-          <label for="paperType"><b>Paper Type:</b></label>
-          <select id="paperType" v-model="paperType">
-            <option value="A4">A4</option>
-            <option value="Letter">Letter</option>
-          </select>
-          <input type="button" value="Generate" class="btn-blue" @click="generate">
+  <div class="gen" :class="{ 'is-coins': isCoins }" :style="accentStyle">
+    <div class="screen-only">
+      <!-- topbar -->
+      <div class="gen-topbar">
+        <div class="gen-crumb">
+          <NuxtLink to="/" class="cf-brand">
+            <img src="/favicon.svg" alt="" class="cf-logo" width="24" height="24">
+            <span class="cf-wordmark">CoverForge</span>
+          </NuxtLink>
+          <span class="sep">/</span>
+          <NuxtLink :to="`/${game.id}`" class="gen-game"><span class="dot" />{{ game.title }}</NuxtLink>
+          <span class="gen-setname">{{ label }}</span>
         </div>
-        <div>
-          <label for="sizeInput"><b>{{ sizeLabel }}</b></label>
-          <input id="sizeInput" v-model="sizeInput" type="text">
+        <div class="gen-meta">{{ typeLabel }} · {{ coverSet.total }} covers</div>
+      </div>
+
+      <div class="gen-body">
+        <!-- sidebar -->
+        <aside class="gen-side">
+          <div class="side-group">
+            <div class="side-label">Print size</div>
+            <div class="side-sub">Paper</div>
+            <div class="segmented" style="width: 100%">
+              <button style="flex: 1" :class="{ active: paper === 'A4' }" @click="paper = 'A4'">A4</button>
+              <button style="flex: 1" :class="{ active: paper === 'Letter' }" @click="paper = 'Letter'">Letter</button>
+            </div>
+            <div class="side-sub" style="display: flex; justify-content: space-between; align-items: center">
+              <span>{{ isCoins ? 'Coin width' : 'Card width' }}</span>
+              <span class="width-val">{{ widthLabel }}</span>
+            </div>
+            <div class="width-row">
+              <button class="step-btn" aria-label="decrease" @click="stepWidth(-1)">−</button>
+              <input class="width-range" type="range" :min="wMin" :max="wMax" step="1" v-model.number="widthMm">
+              <button class="step-btn" aria-label="increase" @click="stepWidth(1)">+</button>
+            </div>
+          </div>
+
+          <div class="side-group">
+            <div class="side-label" style="margin-bottom: 11px">To-scale reference</div>
+            <div class="size-ref">
+              <div class="ref-sheet" :style="refSheetStyle">
+                <span v-for="n in refCells" :key="n" />
+              </div>
+              <div>
+                <div class="ref-card" :style="refCardStyle" />
+                <div style="font: 600 11px var(--font-mono); margin-top: 7px; color: var(--ink-2)">
+                  1 {{ isCoins ? 'coin' : 'card' }} = {{ widthLabel }}
+                </div>
+                <div style="font-size: 11px; color: var(--muted-2); margin-top: 1px">
+                  {{ sm.perRow }} per row · {{ sm.perSheet }}/sheet
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="side-group">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px">
+              <div class="side-label">Categories</div>
+              <div class="cat-count">{{ coverSet.total }} covers</div>
+            </div>
+            <div
+              v-for="row in catRows"
+              :key="row.key"
+              class="cat-row"
+              :style="{ paddingLeft: `${row.depth * 16}px` }"
+            >
+              <span v-if="row.hasChildren" class="cat-caret" @click.stop="toggleExpand(row.key)">
+                {{ row.expanded ? '▾' : '▸' }}
+              </span>
+              <span v-else class="cat-caret" />
+              <div class="cat-box" :class="row.state" @click.stop="toggleCategory(row.node)">
+                {{ row.state === 'on' ? '✓' : row.state === 'some' ? '–' : '' }}
+              </div>
+              <span class="cat-name" @click="scrollToCat(row.top)">{{ row.node.label }}</span>
+              <span class="cat-count">{{ row.node.coverIds.length }}</span>
+            </div>
+          </div>
+        </aside>
+
+        <!-- preview -->
+        <main class="gen-main">
+          <div class="gen-toolbar">
+            <div class="title">
+              <h3>All covers</h3>
+              <span class="cat-count">{{ selectedCount }} of {{ coverSet.total }} selected</span>
+            </div>
+            <div style="display: flex; gap: 9px">
+              <button class="btn" @click="selectAllGlobal">Select all</button>
+              <button class="btn" @click="clearGlobal">Clear all</button>
+            </div>
+          </div>
+
+          <section
+            v-for="sec in sections"
+            :key="sec.label"
+            :ref="(el) => registerSection(sec.label, el)"
+            class="cat-section"
+            style="scroll-margin-top: 70px"
+          >
+            <div class="cat-section-head">
+              <h3>{{ sec.label }} <span class="cat-count" style="margin-left: 4px">{{ sec.covers.length }}</span></h3>
+              <div style="display: flex; gap: 8px">
+                <button class="btn" @click="selectIds(sec.ids)">Select</button>
+                <button class="btn" @click="clearIds(sec.ids)">Clear</button>
+              </div>
+            </div>
+            <div class="grid">
+              <div
+                v-for="c in sec.covers"
+                :key="c.i"
+                class="tile"
+                :class="{ sel: isSelected(c.i) }"
+                :title="c.name"
+                @click="toggleCover(c.i)"
+              >
+                <div class="tile-thumb">
+                  <img :src="c.src" :alt="c.name" loading="lazy">
+                  <div v-if="c.copies > 1" class="tile-copies">×{{ c.copies }}</div>
+                </div>
+                <div v-if="isSelected(c.i)" class="tile-check">✓</div>
+                <div class="tile-cap">{{ c.name }}</div>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+
+      <!-- sticky selection bar -->
+      <div class="gen-bar">
+        <div class="gen-bar-left">
+          <div><span class="count">{{ selectedCount }}</span> <span style="font-size: 14px; color: var(--muted)"> covers selected</span></div>
+          <div class="sep" />
+          <div style="font-size: 14px; color: var(--ink-2)">
+            ≈ <b>{{ sm.sheets }}</b> {{ sheetWord }} · {{ widthLabel }} on {{ paper }}
+            <span v-if="printCount !== selectedCount" style="color: var(--muted-2)"> · prints {{ printCount }}</span>
+          </div>
         </div>
-      </form>
-
-      <div>A4 and Letter are auto-scaled with a margin reserved for safe printing.</div>
-
-      <div class="previews">
-        <div class="preview" style="text-align:center;">
-          <b>A4 Example (297 × 210 mm)</b><br>
-          <img src="/images/sample.jpg" alt="A4 Preview">
+        <div class="gen-bar-right">
+          <button class="btn-primary" :disabled="selectedCount === 0" @click="printSheet">Print sheet →</button>
         </div>
       </div>
     </div>
 
-    <!-- Generated images -->
-    <div v-else id="images">
-      <div id="info" style="text-align:center;">
-        <input type="button" value="Print" class="btn-blue" @click="printSheet">
-      </div>
-      <div id="instructions" style="text-align:center;">
-        Click an image to <span class="highlight">remove</span> it.<br>
-        When <span class="highlight">done</span>, press <span class="highlight">Print</span>.
-      </div>
-
-      <div id="preview-area">
-        <img
-          v-for="i in kept"
-          :key="`prev-${i}`"
-          :class="imgClass"
-          :src="srcFor(i)"
-          :style="{ width: `${previewW}px`, height: `${previewH}px` }"
-          @click="removeImage(i)"
-        >
-      </div>
-
-      <div id="print-area" :style="{ '--safe-width': `${activeSafeMm}mm` }">
-        <div v-for="(row, r) in printRows" :key="`row-${r}`" class="print-row">
-          <img
-            v-for="i in row"
-            :key="`print-${i}`"
-            :class="imgClass"
-            :src="srcFor(i)"
-            :style="{ '--w-mm': `${activeWidthMm}mm`, '--h-mm': `${heightMm}mm` }"
+    <!-- print output: only the mm-accurate grid of selected covers -->
+    <div class="print-only">
+      <div class="print-grid">
+        <div v-for="(row, r) in printRows" :key="r" class="print-row">
+          <div
+            v-for="(cell, ci) in row"
+            :key="ci"
+            class="print-cell"
+            :style="{ '--w-mm': `${sm.coverW}mm`, '--h-mm': `${sm.coverH}mm` }"
           >
+            <img :src="cell.src" alt="">
+          </div>
         </div>
       </div>
     </div>
