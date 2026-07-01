@@ -9,7 +9,17 @@ if (!game) {
 }
 const g = game!
 
-useHead({ title: `${g.title} — CoverForge` })
+useSeoMeta({
+  title: `Skylanders ${g.title} card & coin covers`,
+  description: `Browse ${setCount(g)} creator cover sets for Skylanders ${g.title} — printable, size-accurate card and coin covers for your NFC figures.`,
+})
+defineOgImage('CoverForge', {
+  title: `Skylanders ${g.title}`,
+  subtitle: 'Card & coin covers',
+  accent: g.color,
+  accentDark: g.accentDark,
+  logo: g.logo,
+})
 
 const man = manifest as Record<string, Record<string, Record<string, string[]>>>
 const type = ref<'cards' | 'coins'>('cards')

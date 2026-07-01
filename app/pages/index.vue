@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { games } from "~/data/games";
 
-useHead({
-    title: "CoverForge — printable covers for Skylanders NFC cards & coins",
-    htmlAttrs: {},
-});
+useSeoMeta({
+  title: 'Printable NFC card & coin covers',
+  description:
+    'Printable cover-art sheets for Skylanders NFC cards and coins. Pick a game, curate a creator’s cover set, and print a size-accurate sheet.',
+})
+defineOgImage('CoverForge', { title: 'Printable card & coin covers' })
 </script>
 
 <template>
@@ -13,7 +15,7 @@ useHead({
 
         <div class="container home">
             <div class="home-hero">
-                <div class="mono">Community fork · CoverForge</div>
+                <div class="mono">Community fork · Skylanders CoverForge</div>
                 <h1>
                     Printable cover art for Skylanders NFC cards &amp; coins
                 </h1>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Game } from '~/data/games'
 import type { SetLink } from '~/data/games'
+import { slugify } from '~/data/games'
 
 const props = defineProps<{
   game: Game
@@ -29,7 +30,7 @@ function avatarColor(name: string): string {
 
 <template>
   <NuxtLink
-    :to="`/${game.id}/${type}/${link.set}`"
+    :to="`/${game.id}/${type}/${slugify(link.set)}`"
     class="set-card"
     :style="{ '--accent': game.color, '--accent-dark': game.accentDark }"
     :class="{ coins: type === 'coins' }"

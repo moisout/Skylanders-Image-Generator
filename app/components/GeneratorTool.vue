@@ -165,7 +165,10 @@ function printSheet() {
         <div class="gen-crumb">
           <NuxtLink to="/" class="cf-brand">
             <img src="/favicon.svg" alt="" class="cf-logo" width="24" height="24">
-            <span class="cf-wordmark">CoverForge</span>
+            <span class="cf-lockup">
+              <span class="cf-lead">Skylanders</span>
+              <span class="cf-wordmark">CoverForge</span>
+            </span>
           </NuxtLink>
           <span class="sep">/</span>
           <NuxtLink :to="`/${game.id}`" class="gen-game"><span class="dot" />{{ game.title }}</NuxtLink>

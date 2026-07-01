@@ -252,8 +252,22 @@ the folder-scan manifest, print is still mm-accurate.
   (`role`/`aria-checked`/`tabindex` + Enter/Space); toggles use real `<button>`s with
   `aria-pressed`.
 
+### Naming + SEO (done 2026-07-02)
+
+- Renamed to **Skylanders CoverForge** (differentiates from other "CoverForge" sites
+  and front-loads the keyword). Header shows a lockup: small "Skylanders" lead + bold
+  "CoverForge" logotype.
+- SEO via the **`@nuxtjs/seo`** module collection: `site` config
+  (`url: https://coverforge.m0.is`), per-page `useSeoMeta` titles/descriptions (fixes
+  the duplicate generator titles — now unique per game+type), auto canonical + sitemap
+  (`/sitemap.xml`, 98 URLs) + robots, and dynamic per-page OG images
+  (`app/components/OgImage/CoverForge.takumi.vue`, rendered by nuxt-og-image/takumi).
+  Error page is `noindex`.
+- **URLs are lowercase slugs** (`/spyro/cards/mr-shadow`): `slugify()` + `setBySlug()`
+  in `games.ts` map the slug back to the real folder name (kept for the manifest and
+  `/assets/…` paths). Cleaner + avoids case-sensitivity 404s on GitHub Pages.
+
 ### Still open (nice-to-haves)
 
-- **SEO/social**: no meta description or Open Graph tags/image yet (owner will do).
 - The manifest is imported whole into the generator route's client chunk (~4.7k path
   strings). Fine now; could be scoped per-set if bundle size matters.

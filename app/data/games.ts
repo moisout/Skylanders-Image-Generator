@@ -276,3 +276,20 @@ export function allSets(g: Game): SetLink[] {
 export function setCount(g: Game): number {
   return allSets(g).length
 }
+
+/** URL slug for a set folder name, e.g. "Mr_Shadow" -> "mr-shadow". */
+export function slugify(set: string): string {
+  return set
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+/** Resolve a URL slug back to its set (folder name + label) within a game+type. */
+export function setBySlug(
+  g: Game,
+  type: 'cards' | 'coins',
+  slug: string,
+): SetLink | undefined {
+  return [...g[type].front, ...g[type].back].find((s) => slugify(s.set) === slug)
+}

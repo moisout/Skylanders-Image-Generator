@@ -24,10 +24,11 @@ const creators: Creator[] = [
   { avatar: 'grey.png', alt: 'Mejoe', name: 'Mejoe', thanks: 'Thanks for your great work on covers and images - it’s a huge help for completing the sets!' },
 ]
 
-useHead({
-  title: 'Creators — CoverForge',
-  htmlAttrs: {},
+useSeoMeta({
+  title: 'Creators & credits',
+  description: 'The community artists behind Skylanders CoverForge — the card and coin cover-art creators.',
 })
+defineOgImage('CoverForge', { title: 'Creators & credits' })
 </script>
 
 <template>
@@ -39,14 +40,14 @@ useHead({
       <div class="cr-hero-fade" />
       <div class="cr-hero-inner">
         <h1>Creators &amp; Credits</h1>
-        <p>Every cover and coin in CoverForge was made by these community artists.</p>
+        <p>Every cover and coin in Skylanders CoverForge was made by these community artists.</p>
       </div>
     </div>
 
     <div class="container cr-body">
       <div class="project-note">
         <p>
-          CoverForge is a fork of the
+          Skylanders CoverForge is a fork of the
           <a
             href="https://github.com/skylandersnfc/Skylanders-Image-Generator"
             target="_blank"

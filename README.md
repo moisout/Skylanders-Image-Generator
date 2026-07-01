@@ -1,4 +1,4 @@
-# CoverForge
+# Skylanders CoverForge
 
 Printable cover-art sheets for Skylanders NFC cards & coins. A community fork of the
 [SkylandersNFC Image Generator](https://github.com/skylandersnfc/Skylanders-Image-Generator),

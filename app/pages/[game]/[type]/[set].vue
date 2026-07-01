@@ -1,27 +1,41 @@
 <script setup lang="ts">
 import manifest from '~/data/manifest.json'
-import { gamesById } from '~/data/games'
+import { gamesById, setBySlug } from '~/data/games'
 
 const route = useRoute()
 const gameId = String(route.params.game)
 const type = String(route.params.type)
-const set = String(route.params.set)
+const slug = String(route.params.set) // URL slug, e.g. "mr-shadow"
 
 const game = gamesById[gameId]
-const images = (manifest as Record<string, Record<string, Record<string, string[]>>>)
-  ?.[gameId]?.[type]?.[set]
+const isType = type === 'cards' || type === 'coins'
+const link = game && isType ? setBySlug(game, type, slug) : undefined
+const images = link
+  ? (manifest as Record<string, Record<string, Record<string, string[]>>>)?.[gameId]?.[type]?.[
+      link.set
+    ]
+  : undefined
 
-if (!game || (type !== 'cards' && type !== 'coins') || !images) {
+if (!game || !isType || !link || !images) {
   throw createError({ statusCode: 404, statusMessage: 'Generator not found', fatal: true })
 }
 
 const g = game!
-const label =
-  [...g[type as 'cards' | 'coins'].front, ...g[type as 'cards' | 'coins'].back].find(
-    (s) => s.set === set,
-  )?.label ?? set
+const set = link!.set // real folder name (source of truth for /assets + manifest)
+const label = link!.label
 
-useHead({ title: `${label} — CoverForge` })
+const typeName = type === 'coins' ? 'Coins' : 'Cards'
+useSeoMeta({
+  title: `${label} — Skylanders ${g.title} ${typeName}`,
+  description: `Print ${label} — size-accurate Skylanders ${g.title} ${type} covers for your NFC ${type === 'coins' ? 'coins' : 'cards'}.`,
+})
+defineOgImage('CoverForge', {
+  title: label,
+  subtitle: `Skylanders ${g.title} · ${typeName}`,
+  accent: g.color,
+  accentDark: g.accentDark,
+  logo: g.logo,
+})
 </script>
 
 <template>

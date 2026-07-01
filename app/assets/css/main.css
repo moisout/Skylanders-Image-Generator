@@ -122,6 +122,20 @@ h3 {
   flex: none;
 }
 
+.cf-lockup {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.cf-lead {
+  font: 600 9.5px var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  margin-bottom: 2px;
+}
+
 .cf-wordmark {
   font-family: var(--font-display);
   font-weight: 600;
